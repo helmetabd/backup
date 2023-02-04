@@ -1,13 +1,17 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, TouchableOpacity} from 'react-native';
+import {Alert, StyleSheet, Text, TextInput, View, TouchableOpacity, TouchableWithoutFeedback, Image, TouchableHighlight} from 'react-native';
 // import Button from 'react-native-button';
-import {AppStyles} from '../AppStyles';
+import {AppIcon, AppStyles} from '../AppStyles';
 import { useDispatch, useSelector } from 'react-redux';
 import CustomDatePicker from '../components/CustomDatePicker';
 import axios from 'axios';
+import localhostaddress from '../localhost';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Block, Input} from "galio-framework"
+import {Block, Button, Input, theme} from "galio-framework"
 import DropDownPicker from 'react-native-dropdown-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ProfileAddScreen = ({navigation}) =>  {
   const isProfile = useSelector(state => state.isProfile)
@@ -17,6 +21,8 @@ const ProfileAddScreen = ({navigation}) =>  {
   const [birthDate, setBirthDate] = useState(new Date());
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [titleImage, setTitleImage] = useState(null);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([
     {label: 'Men', value: 'Men'},
@@ -35,14 +41,79 @@ const ProfileAddScreen = ({navigation}) =>  {
     }
   }
 
+  const checkImage = () => {
+    if(dataProfile.coverImage){
+      setSelectedImage(dataProfile.coverImage)
+    } 
+  }
+
   useEffect(() => {
     checkIsProfile();
+    checkImage();
   }, []);
+
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+    });
+
+    if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+        setTitleImage(result.assets[0].width);
+        upload(result.assets[0].uri,)
+    } else {
+        alert('You did not select any image.');
+    }
+  };
+
+  const upload = async (uri) => {
+
+    const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+            console.log(e);
+            reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", uri, true);
+        xhr.send(null);
+    });
+
+    const storageRef = ref(storage, `Patient/${dataProfile.name}/${titleImage}.${dataProfile.id}`);
+
+    await uploadBytes(storageRef, blob)
+    .then((snapshot) => {
+        return getDownloadURL(storageRef)
+    })
+    .then(downloadUrl => {
+        console.log(downloadUrl);
+        // setLinkImage(downloadUrl);
+        dispatch({type: "SET_IMAGE", payload: downloadUrl} )
+    })
+    .catch(err => {
+        console.log(err);
+    })      
+  }
+
+  const convertDate = (date) => {
+    const newDate = new Date(date);
+    const parseDate = newDate.toDateString().split(' ').slice(1);
+    const finalDate = `${parseDate[1]} ${parseDate[0]} ${parseDate[2]}`;
+    // console.log(newDate);
+    return finalDate;
+    // return console.log(date);
+  }
 
   const addProfile = async () => {
     try {
-      let { data } = await axios.put(`http://192.168.1.5:8080/api/patient`, 
-        { name: name, address: address, birthDate: birthDate, gender: gender }, {
+      let { data } = await axios.put(`${localhostaddress}:8080/api/patient`, 
+        { name: name, address: address, birthDate: birthDate, gender: gender, coverImage: dataProfile.coverImage }, {
         headers: {
           "Content-Type": "application/json",
           Authorization: await AsyncStorage.getItem("Authorization")
@@ -59,7 +130,68 @@ const ProfileAddScreen = ({navigation}) =>  {
 
   const edit = () => {
     return(
-      <Block>
+      <Block center>
+        <Input
+          rounded
+          type="default"
+          placeholder='Name'
+          bgColor='transparent'
+          style={styles.InputContainer}
+          onChangeText={setName}
+          value={name}
+          label="Name"
+        />
+        <Input
+          rounded
+          type="default"
+          placeholder='Address'
+          bgColor='transparent'
+          style={styles.InputContainer}
+          onChangeText={setAddress}
+          value={address}
+          label="Address"
+        />
+        <Block>
+          <Text style={styles.body}>Birthdate</Text>
+          <View style={styles.InputDrop}>
+            <TextInput
+              value={convertDate(birthDate)}
+              editable={false}
+            />
+          </View>
+        </Block>
+        <View style={{width: AppStyles.textInputWidth.main, marginTop: 30}}>
+          <DropDownPicker
+            open={open}
+            disabled={true}
+            value={gender}
+            items={items}
+            setOpen={setOpen}
+            setValue={setGender}
+            setItems={setItems}
+            placeholder="Gender"
+            style={styles.bodyDrop}
+            textStyle={{
+              color: AppStyles.color.text,
+            }}
+            // containerStyle={styles.bodyDrop}
+          />
+        </View>
+      </Block>
+    )
+  }
+
+  return (
+    <Block flex center safe>
+      <Block center>
+      <Text style={[styles.title, styles.leftTitle]}>{isProfile ? "Change Profile" : "Input your profile"}</Text>
+      <Block center style={[styles.imageContainer, styles.shadow]}>
+        <TouchableHighlight onPress={() => pickImageAsync()}>
+          <Image source={!selectedImage ? AppIcon.images.defaultUser : {uri: selectedImage}} style={styles.horizontalImage} />
+        </TouchableHighlight>
+      </Block>
+      { isProfile ? edit() : 
+      <Block center>
         <Input
           rounded
           type="default"
@@ -97,76 +229,24 @@ const ProfileAddScreen = ({navigation}) =>  {
             setOpen={setOpen}
             setValue={setGender}
             setItems={setItems}
-            placeholder="Gender"
+            placeholder={gender}
             style={styles.bodyDrop}
             textStyle={{
               color: AppStyles.color.text,
             }}
-            // containerStyle={styles.bodyDrop}
           />
         </View>
-        <TouchableOpacity
-          style={[styles.facebookContainer, {marginTop: 50}]}
-          onPress={() => addProfile()}>
-          <Text style={styles.facebookText}>Add</Text>
-        </TouchableOpacity>
+      </Block> 
+      }
       </Block>
-    )
-  }
-
-  return (
-    <Block flex center safe>
-      <Text style={[styles.title, styles.leftTitle]}>{isProfile ? "Change Profile" : "Input your profile"}</Text>
-      <Input
-        rounded
-        type="default"
-        placeholder='Name'
-        bgColor='transparent'
-        style={styles.InputContainer}
-        onChangeText={setName}
-        value={name}
-        label="Name"
-      />
-      <Input
-        rounded
-        type="default"
-        placeholder='Address'
-        bgColor='transparent'
-        style={styles.InputContainer}
-        onChangeText={setAddress}
-        value={address}
-        label="Address"
-      />
-      <Block>
-        <Text style={styles.body}>Birthdate</Text>
-        <View style={styles.InputDrop}>
-          <CustomDatePicker
-              defaultDate="2000-05-03"
-              onDateChange={(value) => setBirthDate(value)}
-              />
-        </View>
-      </Block>
-      <View style={{width: AppStyles.textInputWidth.main, marginTop: 30}}>
-        <DropDownPicker
-          open={open}
-          value={gender}
-          items={items}
-          setOpen={setOpen}
-          setValue={setGender}
-          setItems={setItems}
-          placeholder="Gender"
-          style={styles.bodyDrop}
-          textStyle={{
-            color: AppStyles.color.text,
-          }}
-          // containerStyle={styles.bodyDrop}
-        />
-      </View>
-      <TouchableOpacity
-        style={[styles.facebookContainer, {marginTop: 50}]}
-        onPress={() => addProfile()}>
-        <Text style={styles.facebookText}>Add</Text>
-      </TouchableOpacity>
+      <Button
+        color={AppStyles.color.tint}
+        round
+        shadowless
+        size='large'
+        style={styles.ButtonDrop}
+        onPress={() => addProfile()}
+      >Add Data</Button>
     </Block>
   );
 }
@@ -185,8 +265,8 @@ const styles = StyleSheet.create({
   },
   leftTitle: {
     alignSelf: 'stretch',
-    textAlign: 'left',
-    marginLeft: 20,
+    textAlign: 'center',
+    // marginLeft: 20,
   },
   content: {
     paddingLeft: 50,
@@ -217,13 +297,28 @@ const styles = StyleSheet.create({
     // borderRadius: AppStyles.borderRadius.main,
   },
   InputDrop: {
-    width: AppStyles.textInputWidth.main,
-    // width: "80%",
+    // width: AppStyles.textInputWidth.main,
+    width: 325,
+    height: 45, 
     marginTop: 10,
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: AppStyles.color.grey,
     borderRadius: AppStyles.borderRadius.main,
+    paddingLeft: 20,
+    paddingTop: 5
+  },
+  ButtonDrop: {
+    // width: AppStyles.textInputWidth.main,
+    width: 325,
+    height: 45, 
+    marginTop: 20,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: AppStyles.color.grey,
+    borderRadius: AppStyles.borderRadius.main,
+    paddingLeft: 20,
+    paddingTop: 5
   },
   bodyDrop: {
     color: AppStyles.color.text,
@@ -249,6 +344,19 @@ const styles = StyleSheet.create({
   },
   facebookText: {
     color: AppStyles.color.white,
+  },
+  shadow: {
+    marginTop: 10,
+    shadowColor: theme.COLORS.BLACK,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    elevation: 2,
+  },
+  horizontalImage: {
+    height: 150,
+    width: 150,
+    borderRadius: 10,
   },
 });
 

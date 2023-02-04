@@ -5,26 +5,27 @@ import {
   Alert,
   Image,
   ScrollView,
+  TextInput,
+  View,
 } from 'react-native';
 // import Button from 'react-native-button';
 import { AppStyles } from '../AppStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { Button, Block, Input } from "galio-framework"
-import Textarea from 'react-native-textarea';
+import localhostaddress from '../localhost';
+import { Button, Block, Input, theme } from "galio-framework"
 
-function ConsultationScreen({route, navigation}) {
+function ConsultationScreen({navigation}) {
   const [doctor, setDoctor] = useState({});
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const { item } = route.params;
   const dataDoctor = useSelector(state => state.dataDoctor);
 
   const dispatch = useDispatch();
 
   const fetchDoctor = async () => {
-    axios.get(`http://192.168.1.5:8080/api/doctor/${dataDoctor.id}`, { 
+    axios.get(`${localhostaddress}:8080/api/doctor/${dataDoctor.id}`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -51,7 +52,7 @@ function ConsultationScreen({route, navigation}) {
     }
     try {
       // login
-      let { data } = await axios.post('http://192.168.1.5:8080/api/consult', 
+      let { data } = await axios.post(`${localhostaddress}:8080/api/consult`, 
         { doctorId: doctor.id, subject: subject, description: description }, {
         headers: {
           "Content-Type": "application/json",
@@ -67,55 +68,84 @@ function ConsultationScreen({route, navigation}) {
   };
 
   return (
-    <ScrollView>
-      <Block flex center>
-        <Block row>
-          <Image style={styles.gambar} source={{uri: dataDoctor.coverImage}}/>
+    <Block>
+      <ScrollView>
+        <Block flex center>
+          <Block row={true} card flex style={[styles.product, styles.shadow]}>
+              <Block flex style={[styles.imageContainer, styles.shadow]}>
+                <Image source={{ uri: doctor.coverImage }} style={styles.horizontalImage} />
+              </Block>
+              <Block flex space="between" style={styles.productDescription}>
+                <Text bold size={14} style={styles.productTitle}>Dr. {doctor.name}</Text>
+                <Text size={14} style={styles.productTitle} >{doctor.age} years old</Text>
+                <Text size={14} style={styles.productTitle} >Specialist {doctor.specialist}</Text>
+              </Block>
+            </Block>
+          <Text style={[styles.title, styles.leftTitle]}>Consultation</Text>
+          <Input
+            rounded
+            type='default'
+            placeholder='Subject'
+            bgColor='transparent'
+            style={styles.InputContainer}
+            onChangeText={setSubject}
+            value={subject}
+            label="Subject"
+          />
+          {/* <Textarea
+            containerStyle={styles.textareaContainer}
+            style={styles.textarea}
+            onChangeText={setDescription}
+            defaultValue={description}
+            maxLength={120}
+            placeholder={'Description'}
+            placeholderTextColor={'black'}
+            underlineColorAndroid={'transparent'}
+          /> */}
+          {/* <Input
+            multiline={true}
+            textStyle={styles.textarea}
+            placeholder="Description"
+            numberOfLines={5}
+            style={styles.textareaContainer}
+            onChangeText={setDescription}
+            value={description}
+          /> */}
           <Block>
-            <Text style={styles.or}>Dr. {dataDoctor.name}</Text>
-            <Text style={styles.comment}>{dataDoctor.specialist}</Text>
-            <Text style={styles.comment}>{dataDoctor.age} years old</Text>
+          <Text style={styles.body}>Description</Text>
+          <View
+            style={{
+              backgroundColor: "transparent",
+              borderColor: '#000000',
+              borderWidth: 1,
+              width: 325,
+              height: 100,
+              marginTop: 5,
+              borderRadius: 20
+            }}>
+            <TextInput
+              editable
+              placeholder='Description'
+              multiline
+              numberOfLines={5}
+              maxLength={400}
+              onChangeText={setDescription}
+              value={description}
+              style={{paddingLeft: 15, height: 100, width: AppStyles.textInputWidth.main}}
+            />
+          </View>
           </Block>
+          <Button
+            color={AppStyles.color.tint}
+            round
+            shadowless
+            size='large'
+            style={styles.loginContainer}
+            onPress={() => consult()}
+          >Send Consultation</Button>
         </Block>
-        <Text style={[styles.title, styles.leftTitle]}>Consultation</Text>
-        <Input
-          rounded
-          type='default'
-          placeholder='Subject'
-          bgColor='transparent'
-          style={styles.InputContainer}
-          onChangeText={setSubject}
-          value={subject}
-        />
-        <Textarea
-          containerStyle={styles.textareaContainer}
-          style={styles.textarea}
-          onChangeText={setDescription}
-          defaultValue={description}
-          maxLength={120}
-          placeholder={'Description'}
-          placeholderTextColor={'black'}
-          underlineColorAndroid={'transparent'}
-        />
-        {/* <Input
-          multiline={true}
-          textStyle={styles.textarea}
-          placeholder="Description"
-          numberOfLines={5}
-          style={styles.textareaContainer}
-          onChangeText={setDescription}
-          value={description}
-        /> */}
-        <Button
-          color={AppStyles.color.tint}
-          round
-          shadowless
-          size='small'
-          style={styles.loginContainer}
-          onPress={() => consult()}
-        >Send Consultation</Button>
-      </Block>
-    </ScrollView>
+      </ScrollView>
+    </Block>
   );
 }
 
@@ -125,6 +155,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 40,
     marginBottom: 10,
+  },
+  body: {
+    marginTop: 10,
+    marginBottom: 5,
+    paddingLeft: 20,
+    paddingRight: 20,
+    color: "black",
+    fontWeight:'bold'
   },
   title: {
     fontSize: AppStyles.fontSize.title,
@@ -171,7 +209,8 @@ const styles = StyleSheet.create({
   },
   InputContainer: {
     width: AppStyles.textInputWidth.main,
-    marginTop: 30,
+    marginBottom: 20
+    // marginTop: 30,
   },
   body: {
     height: 42,
@@ -195,7 +234,35 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 198,
     resizeMode:'contain',
-},
+  },
+  product: {
+    marginHorizontal: theme.SIZES.BASE,
+    backgroundColor: theme.COLORS.WHITE,
+    marginVertical: theme.SIZES.BASE,
+    borderWidth: 0,
+    minHeight: 114,
+  },
+  shadow: {
+  shadowColor: theme.COLORS.BLACK,
+  shadowOffset: { width: 0, height: 2 },
+  shadowRadius: 4,
+  shadowOpacity: 0.1,
+  elevation: 2,
+  },
+  productTitle: {
+    flex: 1,
+    flexWrap: 'wrap',
+    paddingHorizontal: 10,
+    paddingVertical: 10
+  },
+  imageContainer: {
+    elevation: 1,
+  },
+  horizontalImage: {
+    height: 122,
+    width: 'auto',
+    borderRadius: 10
+  },
 });
 
 export default ConsultationScreen;

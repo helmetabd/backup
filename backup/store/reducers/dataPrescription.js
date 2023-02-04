@@ -1,6 +1,6 @@
-const dataDoctor = (state = {}, action) => {
+const dataPrescription = (state = {}, action) => {
     switch (action.type) {
-        case 'SET_DOCTOR':
+        case 'SET_PRES':
             return action.payload;
             break;
         case 'SET_IMAGE':
@@ -19,4 +19,4 @@ const dataDoctor = (state = {}, action) => {
     }
 }
 
-export default dataDoctor;
+export default dataPrescription;

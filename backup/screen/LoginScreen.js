@@ -1,12 +1,8 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   StyleSheet,
   Text,
-  TextInput,
-  View,
   Alert,
-  ActivityIndicator,
-  TouchableOpacity,
   Image,
 } from 'react-native';
 // import Button from 'react-native-button';
@@ -14,6 +10,7 @@ import { AppStyles } from '../AppStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
+import localhostaddress from '../localhost';
 import { Button, Block, Input } from "galio-framework"
 import { useFonts } from 'expo-font';
 
@@ -45,7 +42,7 @@ if (!fontsLoaded) {
     }
     try {
       // login
-      let { data } = await axios.post('http://192.168.1.5:8080/api/authenticate', { username: username, password: password });
+      let { data } = await axios.post(`${localhostaddress}:8080/api/authenticate`, { username: username, password: password });
       // ketika berhasil login, token disimpan di dalam asyncStorage
       await AsyncStorage.setItem('Authorization', `Bearer ${data.token}`);
       dispatch({ type: 'SET_LOGIN' })

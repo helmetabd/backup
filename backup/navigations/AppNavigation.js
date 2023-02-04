@@ -16,6 +16,9 @@ import InputImage from '../components/InputImage';
 import Doctors from '../screen/Doctors';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import ConsultationScreen from '../screen/ConsultationScreen';
+import Consultations from '../screen/Consultations';
+import ConsultationDetails from '../screen/ConsultationDetails';
+import Prescription from '../screen/Prescriptions';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +38,7 @@ const LoginStack = () => (
 );
 
 const DoctorStack = () => {
+  return(
   <Stack.Navigator
     initialRouteName="Doctor"
     screenOptions={{
@@ -56,6 +60,34 @@ const DoctorStack = () => {
     />
     <Stack.Screen name="Consultation" component={ConsultationScreen} />
   </Stack.Navigator>
+  )
+}
+
+const ConsultationStack = () => {
+  return(
+  <Stack.Navigator
+    initialRouteName="Consultations"
+    screenOptions={{
+      headerTintColor: 'red',
+      headerTitleStyle: styles.headerTitleStyle,
+      headerMode: 'float',
+    }}>
+    <Stack.Screen
+      name="Consultations"
+      component={Consultations}
+      options={({navigation}) => ({
+        headerLeft: () => (
+          <Pressable onPress={() => navigation.openDrawer()}>
+            <Image style={styles.iconStyle} source={AppIcon.images.menu} />
+          </Pressable>
+        ),
+        headerLeftContainerStyle: {paddingLeft: 10},
+      })}
+    />
+    <Stack.Screen name="Consultation Detail" component={ConsultationDetails} />
+    <Stack.Screen name="Prescription" component={Prescription} />
+  </Stack.Navigator>
+  )
 }
 
 const HomeStack = () => {
@@ -85,18 +117,10 @@ const HomeStack = () => {
       <Stack.Screen
         name="AddProfile"
         component={ProfileAddScreen}
-        options={({navigation}) => ({
-          headerLeft: () => (
-            <Pressable onPress={() => navigation.openDrawer()}>
-              <Image style={styles.iconStyle} source={AppIcon.images.menu} />
-            </Pressable>
-          ),
-          headerLeftContainerStyle: {paddingLeft: 10},
-        })}
       />
       <Stack.Screen
-        name="Image"
-        component={InputImage}
+        name="Doctor"
+        component={DoctorStack}
         options={({navigation}) => ({
           headerLeft: () => (
             <Pressable onPress={() => navigation.openDrawer()}>
@@ -141,9 +165,23 @@ const TabNavigator = () => (
             <MaterialCommunityIcons name="doctor" size={24} color="black" />
           );
         },
+        headerShown: false,
       }}
       name="Doctor"
       component={DoctorStack}
+    />
+    <BottomTab.Screen
+      options={{
+        tabBarLabel: 'Consultation',
+        tabBarIcon: ({focused}) => {
+          return (
+            <AntDesign name="wechat" size={24} color="black" />
+          );
+        },
+        headerShown: false,
+      }}
+      name="Consultation"
+      component={ConsultationStack}
     />
   </BottomTab.Navigator>
 );

@@ -2,10 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import {View, StyleSheet, Text, SafeAreaView, Alert} from 'react-native';
+import {View, StyleSheet, Text, SafeAreaView, Alert, Image} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { Block, Button } from "galio-framework"
+import { Block, Button, theme } from "galio-framework"
 import { AppStyles } from '../AppStyles';
+import localhostaddress from '../localhost';
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -13,7 +14,7 @@ const Home = () => {
     const dataProfile = useSelector(state => state.dataProfile)
 
     const fetchProfile = async () => {
-        axios.get(`http://192.168.1.5:8080/api/patient`, { 
+        axios.get(`${localhostaddress}:8080/api/patient`, { 
             headers:{
                 "Content-Type": "application/json",
                 Authorization: await AsyncStorage.getItem('Authorization')
@@ -35,19 +36,12 @@ const Home = () => {
         fetchProfile();
     }, [])
 
-    const logout = async () => {
-        try {
-            await AsyncStorage.removeItem('Authorization');
-            dispatch({ type: 'SET_LOGOUT'});
-        } catch(err) {
-            console.log(err)
-            Alert.alert('Something went wrong')
-        }
-    }
     return (
-        <Block safe>
+        <Block safe center>
             <Text style={[styles.title, styles.leftTitle]}>Welcome back {dataProfile.name}</Text>
-            <Button round shadowless size='small' color={AppStyles.color.tint} onPress={logout}>Logout</Button>
+            <Block center style={styles.shadow}>
+                <Image source={{uri: dataProfile.coverImage}} style={styles.horizontalImage} />
+            </Block>
         </Block>
     );
 }
@@ -62,8 +56,21 @@ const styles = StyleSheet.create({
       },
       leftTitle: {
         alignSelf: 'stretch',
-        textAlign: 'left',
-        marginLeft: 20,
+        textAlign: 'center',
+        // marginLeft: 20,
+      },
+      shadow: {
+        marginTop: 10,
+        shadowColor: theme.COLORS.BLACK,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        shadowOpacity: 0.1,
+        elevation: 2,
+      },
+      horizontalImage: {
+        height: 150,
+        width: 150,
+        borderRadius: 10,
       },
 })
 

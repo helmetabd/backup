@@ -1,4 +1,4 @@
-const dataProfile = (state = {}, action) => {
+const dataConsult = (state = {}, action) => {
     switch (action.type) {
         case 'SET_CONSULT':
             return action.payload;
@@ -19,4 +19,4 @@ const dataProfile = (state = {}, action) => {
     }
 }
 
-export default dataProfile;
+export default dataConsult;

@@ -21,15 +21,15 @@ export default function DrawerContainer({navigation}) {
     <View style={styles.content}>
       <View style={styles.container}>
         <MenuButton
-          title="Profile"
+          title="Profile Settings"
           icon="user"
           onPress={() => {navigation.navigate("AddProfile")}}
         />
-        <MenuButton
+        {/* <MenuButton
           title="Image"
           icon="picture"
           onPress={() => {navigation.navigate("Image")}}
-        />
+        /> */}
         <MenuButton
           title="Logout"
           icon="logout"

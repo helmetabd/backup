@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Alert, StyleSheet, Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
 import {AppStyles} from '../AppStyles';
 import {useDispatch} from 'react-redux';
+import localhostaddress from '../localhost';
 import axios from 'axios';
 import { Button, Block, Input } from "galio-framework"
 
@@ -16,7 +17,7 @@ function SignupScreen({navigation}) {
       Alert.alert('Please fill out the required fields.');
       return;
     }
-    axios.post('http://192.168.1.5:8080/api/register', { username: username, password: password })
+    axios.post(`${localhostaddress}:8080/api/register`, { username: username, password: password })
     .then(response => {
         let { data, status } = response;
         if (status === 200) {

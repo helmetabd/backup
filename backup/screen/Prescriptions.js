@@ -3,19 +3,23 @@ import axios from "axios";
 import { Block, Text, theme } from "galio-framework";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppStyles } from "../AppStyles";
 import localhostaddress from "../localhost";
 
 const { width, height } = Dimensions.get("screen");
 
-export default function Doctors(props) {
+export default function Prescription(props) {
   const { navigation } = props;
-  const [doctors, setDoctors] = useState([]);
+  const dataConsult = useSelector(state => state.dataConsult)
+  const [items, setitems] = useState([]);
+  const [prescription, setPrescription] = useState({});
   const dispatch = useDispatch();
+  const dataPrescription = useSelector(state => state.dataPrescription);
+  const dataPatient = useSelector(state => state.dataPatient);
 
-  const fetchDoctors = async () => {
-    axios.get(`${localhostaddress}:8080/api/doctor`, { 
+  const fetchPrescription = async () => {
+    axios.get(`${localhostaddress}:8080/api/prescription/${dataPrescription.id}`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -23,7 +27,8 @@ export default function Doctors(props) {
     })
     .then(({ data }) => {
         console.log(data);
-        setDoctors(data);
+        setPrescription(data);
+        dispatch({ type: 'SET_PATIENT', payload: data.patient.patientDetail })
     })
     .catch((error) => {
         console.log(error)
@@ -32,12 +37,13 @@ export default function Doctors(props) {
   }
 
   useEffect(() => {
-    fetchDoctors();
+    fetchPrescription();
   }, [])
 
   const goToDoctor = (data) => {
-    dispatch({ type: 'SET_DOCTOR', payload: data })
-    navigation.navigate("Consultation");
+    // dispatch({ type: 'SET_DOCTOR', payload: data })
+    // navigation.navigate("Consultation");
+    Alert.alert("Copy")
   };
   
   const renderDoctors = ({ item }) => (
@@ -45,14 +51,14 @@ export default function Doctors(props) {
     <Block row={true} card flex style={[styles.product, styles.shadow]}>
       <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
           <Block flex style={[styles.imageContainer, styles.shadow]}>
-            <Image source={{ uri: item.coverImage }} style={styles.horizontalImage} />
+            <Image source={{ uri: item.medicine.image }} style={styles.horizontalImage} />
           </Block>
         </TouchableWithoutFeedback>
         <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
           <Block flex space="between" style={styles.productDescription}>
-            <Text bold size={14} style={styles.productTitle}>Dr. {item.name}</Text>
-            <Text size={14} style={styles.productTitle} >{item.age} years old</Text>
-            <Text size={14} style={styles.productTitle} >Specialist {item.specialist}</Text>
+            <Text bold size={14} style={styles.productTitle}>{item.medicine.name}</Text>
+            <Text size={14} style={styles.productTitle} >{item.quantity}</Text>
+            <Text size={14} style={styles.productTitle} >{item.dossage}</Text>
           </Block>
         </TouchableWithoutFeedback>
       </Block>
@@ -76,10 +82,12 @@ export default function Doctors(props) {
         style={styles.components}
         showsVerticalScrollIndicator={false}>
         <Block flex style={styles.group}>
-          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Doctor</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Medicine</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>Doctor: {dataConsult.doctor.doctorDetail.name}</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>Patient: {dataConsult.patient.patientDetail.name}</Text>
           <Block flex>
             <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-              <FlatList vertical numColumns={1} data={doctors} renderItem={renderDoctors} keyExtractor={(item) => `${item.id}`} />
+              <FlatList vertical numColumns={1} data={prescription.items} renderItem={renderDoctors} keyExtractor={(item) => `${item.id}`} />
             </Block>
           </Block>
         </Block>

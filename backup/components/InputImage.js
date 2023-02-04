@@ -70,7 +70,7 @@ const InputImage = ({navigation}) => {
         .then(downloadUrl => {
             console.log(downloadUrl);
             // setLinkImage(downloadUrl);
-            dispatch({type: "SET_DATA", payload: downloadUrl} )
+            dispatch({type: "SET_IMAGE", payload: downloadUrl} )
             navigation.navigate("Home");
         })
         .catch(err => {

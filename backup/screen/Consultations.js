@@ -3,19 +3,19 @@ import axios from "axios";
 import { Block, Text, theme } from "galio-framework";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppStyles } from "../AppStyles";
 import localhostaddress from "../localhost";
 
 const { width, height } = Dimensions.get("screen");
 
-export default function Doctors(props) {
+export default function Consultations(props) {
   const { navigation } = props;
-  const [doctors, setDoctors] = useState([]);
+  const [consultations, setConsultations] = useState([]);
   const dispatch = useDispatch();
 
-  const fetchDoctors = async () => {
-    axios.get(`${localhostaddress}:8080/api/doctor`, { 
+  const fetchConsultations = async () => {
+    axios.get(`${localhostaddress}:8080/api/consult`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -23,7 +23,7 @@ export default function Doctors(props) {
     })
     .then(({ data }) => {
         console.log(data);
-        setDoctors(data);
+        setConsultations(data);
     })
     .catch((error) => {
         console.log(error)
@@ -32,27 +32,33 @@ export default function Doctors(props) {
   }
 
   useEffect(() => {
-    fetchDoctors();
+    fetchConsultations();
   }, [])
 
-  const goToDoctor = (data) => {
-    dispatch({ type: 'SET_DOCTOR', payload: data })
-    navigation.navigate("Consultation");
+  const goToConsultation = (data) => {
+    dispatch({ type: 'SET_CONSULT', payload: data })
+    dispatch({ type: 'SET_DOCTOR', payload: data.doctor })
+    navigation.navigate("Consultation Detail");
   };
   
-  const renderDoctors = ({ item }) => (
+  const renderConsultation = ({ item }) => (
     // <Product doctor={item} horizontal />
     <Block row={true} card flex style={[styles.product, styles.shadow]}>
-      <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
+      <TouchableWithoutFeedback onPress={() => goToConsultation(item)}>
           <Block flex style={[styles.imageContainer, styles.shadow]}>
-            <Image source={{ uri: item.coverImage }} style={styles.horizontalImage} />
+            <Image source={{ uri: item.doctor.doctorDetail.coverImage }} style={styles.horizontalImage} />
           </Block>
         </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
+        <TouchableWithoutFeedback onPress={() => goToConsultation(item)}>
           <Block flex space="between" style={styles.productDescription}>
-            <Text bold size={14} style={styles.productTitle}>Dr. {item.name}</Text>
-            <Text size={14} style={styles.productTitle} >{item.age} years old</Text>
-            <Text size={14} style={styles.productTitle} >Specialist {item.specialist}</Text>
+            <Text bold size={14} style={styles.productTitle}>Dr. {item.doctor.doctorDetail.name}</Text>
+            <Text size={14} style={styles.productTitle} >Specialist {item.doctor.doctorDetail.specialist}</Text>
+            <Block row>
+              <Text size={12} style={styles.productTitle}>{item.subject}</Text>
+              <Text size={12} color={(item.status === "PROGRESS") ? theme.COLORS.PRIMARY : (item.status === "COMPLETED") ? "#45DF31" : theme.COLORS.TWITTER} 
+                style={styles.statusTitle}
+              >{item.status}</Text>
+            </Block>
           </Block>
         </TouchableWithoutFeedback>
       </Block>
@@ -76,10 +82,11 @@ export default function Doctors(props) {
         style={styles.components}
         showsVerticalScrollIndicator={false}>
         <Block flex style={styles.group}>
-          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Doctor</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Consultation</Text>
+          <Text bold size={12} style={[styles.titleConsultation, styles.leftTitle]}>{consultations.length} Consultation</Text>
           <Block flex>
             <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-              <FlatList vertical numColumns={1} data={doctors} renderItem={renderDoctors} keyExtractor={(item) => `${item.id}`} />
+              <FlatList vertical numColumns={1} data={consultations} renderItem={renderConsultation} keyExtractor={(item) => `${item.id}`} />
             </Block>
           </Block>
         </Block>
@@ -142,6 +149,12 @@ export default function Doctors(props) {
       paddingHorizontal: 10,
       paddingVertical: 10
     },
+    statusTitle: {
+      flex: 1,
+      flexWrap: 'wrap',
+      paddingHorizontal: 10,
+      paddingVertical: 10
+    },
     imageContainer: {
       elevation: 1,
     },
@@ -157,6 +170,13 @@ export default function Doctors(props) {
       fontSize: AppStyles.fontSize.title,
       fontWeight: 'bold',
       color: AppStyles.color.tint,
+      marginTop: 20,
+      marginBottom: 5,
+    },
+    titleConsultation: {
+      fontSize: AppStyles.fontSize.content,
+      fontWeight: 'bold',
+      color: AppStyles.color.categoryTitle,
       marginTop: 20,
       marginBottom: 5,
     },
