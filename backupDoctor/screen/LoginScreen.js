@@ -55,7 +55,7 @@ if (!fontsLoaded) {
   return (
     <Block flex center>
       <Block>
-        <Image style={styles.gambar} source={require("../assets/img/Picture5.png")}/>
+        <Image style={styles.gambar} source={require("../assets/img/Picture6.png")}/>
       </Block>
       <Text style={[styles.title, styles.leftTitle]}>Sign In</Text>
       <Text style={styles.comment}>Please put your information below to sign in to your account</Text>
@@ -87,7 +87,7 @@ if (!fontsLoaded) {
         onPress={() => onPressLogin()}
       >Log In</Button>
       <Text style={styles.or}>Dont Have Account?</Text>
-      <Text onPress={() => navigation.navigate("Signup")} style={{ color: 'dimgrey', fontFamily: 'MonoSpace',}}>  Sign Up</Text>
+      <Text onPress={() => navigation.navigate("Signup")} style={{ color: 'dimgrey'}}>  Sign Up</Text>
     </Block>
   );
 }

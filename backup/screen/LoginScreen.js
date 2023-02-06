@@ -87,7 +87,7 @@ if (!fontsLoaded) {
         onPress={() => onPressLogin()}
       >Log In</Button>
       <Text style={styles.or}>Dont Have Account?</Text>
-      <Text onPress={() => navigation.navigate("Signup")} style={{ color: 'dimgrey', fontFamily: 'MonoSpace',}}>  Sign Up</Text>
+      <Text onPress={() => navigation.navigate("Signup")} style={{ color: 'dimgrey'}}>  Sign Up</Text>
     </Block>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Dimensions, ScrollView, Image, ImageBackground, Platform, Alert, StatusBar } from 'react-native';
-import { Block, Button, Text, theme } from 'galio-framework';
+import { Block, Button, Input, Text, theme } from 'galio-framework';
 
 import NumericInput from 'react-native-numeric-input'
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,16 +14,18 @@ const thumbMeasure = (width - 48 - 32) / 3;
 export const StatusHeight = StatusBar.currentHeight;
 export const HeaderHeight = (theme.SIZES.BASE * 3.5 + (StatusHeight || 0));
 
-export default function Profile({navigation, route}) {
+export default function MedicineDetail({navigation, route}) {
   
   const dispatch = useDispatch();
   const dataMedic = useSelector(state => state.dataMedic);
+  const dataDiagnose = useSelector(state => state.dataDiagnose);
   const [medicine, setMedicine] = useState({});
   const [quantity, setQuantity] = useState(0);
+  const [dossage, setDossage] = useState("");
   const { id } = route.params;
 
   const fetchMedicine = async () => {
-    axios.get(`${localhostaddress}:8080/api/medicine/${id}`, { 
+    axios.get(`${localhostaddress}:8081/api/medicine/${id}`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -43,18 +45,20 @@ export default function Profile({navigation, route}) {
     fetchMedicine();
   }, [])
 
-  const addCart = async (id, quantity) => {
+  const addPrescript = async (id, quantity) => {
     try {
-      let { data } = await axios.post(`${localhostaddress}:8080/api/add-to-cart`, 
-      { medicineId: id, quantity: quantity }, {
+      let { data } = await axios.post(`${localhostaddress}:8081/api/add-to-prescription`, 
+      { medicineId: id, quantity: quantity, dossage: dossage, diagnoseId: dataDiagnose.id}, {
       headers: {
         "Content-Type": "application/json",
         Authorization: await AsyncStorage.getItem("Authorization")
       },
     });
-    dispatch({ type: 'ADD_CART', payload: data })
+    // dispatch({ type: 'ADD_CART', payload: data })
+    Alert.alert("Added");
+    navigation.navigate("Medicines");
     } catch (error) {
-      console.log(err);
+      console.log(error);
       Alert.alert('Something went wrong')
     }
   };
@@ -85,10 +89,19 @@ export default function Profile({navigation, route}) {
                 <Text muted size={16}>Price: </Text>
               </Block>
             </Block>
-            <Block style={{ paddingBottom: -HeaderHeight * 2 }}>
+            <Block style={{ paddingBottom: 200 }}>
               <Block center>
-                <NumericInput value={quantity} onChange={value => setQuantity({value})} />
-                <Button round color={AppStyles.color.tint} onPress={() => addCart(medicine.id, quantity)}>Add to cart</Button>
+                <Input
+                  rounded
+                  type='default'
+                  placeholder="Dossage"
+                  bgColor='transparent'
+                  style={styles.InputContainer}
+                  onChangeText={setDossage}
+                  value={dossage}
+                />
+                <NumericInput value={quantity} onChange={value => setQuantity(value)} />
+                <Button round color={AppStyles.color.tint} onPress={() => addPrescript(medicine.id, quantity)}>Add to Prescription</Button>
               </Block>
             </Block>
           </ScrollView>
@@ -158,5 +171,9 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 5,
     textAlign: 'center'
-  }
+  },
+  InputContainer: {
+    width: AppStyles.textInputWidth.main,
+    marginTop: 30,
+  },
 });

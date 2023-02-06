@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { Block, Text, theme } from "galio-framework";
+import { Block, Button, Text, theme } from "galio-framework";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,7 +15,7 @@ export default function Consultations(props) {
   const dispatch = useDispatch();
 
   const fetchConsultations = async () => {
-    axios.get(`${localhostaddress}:8080/api/consult`, { 
+    axios.get(`${localhostaddress}:8081/api/consult`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -37,22 +37,22 @@ export default function Consultations(props) {
 
   const goToConsultation = (data) => {
     dispatch({ type: 'SET_CONSULT', payload: data })
-    dispatch({ type: 'SET_DOCTOR', payload: data.doctor })
+    dispatch({ type: 'SET_PATIENT', payload: data.patient })
     navigation.navigate("Consultation Detail");
   };
   
   const renderConsultation = ({ item }) => (
-    // <Product doctor={item} horizontal />
     <Block row={true} card flex style={[styles.product, styles.shadow]}>
       <TouchableWithoutFeedback onPress={() => goToConsultation(item)}>
           <Block flex style={[styles.imageContainer, styles.shadow]}>
-            <Image source={{ uri: item.doctor.doctorDetail.coverImage }} style={styles.horizontalImage} />
+            <Image source={{ uri: item.patient.patientDetail.coverImage }} style={styles.horizontalImage} />
           </Block>
         </TouchableWithoutFeedback>
         <TouchableWithoutFeedback onPress={() => goToConsultation(item)}>
           <Block flex space="between" style={styles.productDescription}>
-            <Text bold size={14} style={styles.productTitle}>Dr. {item.doctor.doctorDetail.name}</Text>
-            <Text size={14} style={styles.productTitle} >Specialist {item.doctor.doctorDetail.specialist}</Text>
+            <Text bold size={14} style={styles.productTitle}>{item.patient.patientDetail.name}</Text>
+            <Text size={14} style={styles.productTitle} >{item.patient.patientDetail.age} years old</Text>
+            <Text size={14} style={styles.productTitle} >{item.patient.patientDetail.gender}</Text>
             <Block row>
               <Text size={12} style={styles.productTitle}>{item.subject}</Text>
               <Text size={12} color={(item.status === "PROGRESS") ? theme.COLORS.PRIMARY : (item.status === "COMPLETED") ? "#45DF31" : theme.COLORS.TWITTER} 
@@ -62,18 +62,6 @@ export default function Consultations(props) {
           </Block>
         </TouchableWithoutFeedback>
       </Block>
-    // <TouchableHighlight underlayColor="rgba(128, 128, 128, 0.1)" onPress={() => goToDoctor(item)}>
-    //   <View style={styles.container}>
-    //     <View>
-    //       <Image style={styles.photo} source={{ uri: item.coverImage }} />
-    //       <View>
-    //         <Text style={styles.title}>Dr. {item.name}</Text>
-    //         <Text style={styles.title}>{item.specialist}</Text>
-    //         <Text style={styles.title}>{item.age} years old</Text>
-    //       </View>
-    //     </View>
-    //   </View>
-    // </TouchableHighlight>
   );
 
   return (
@@ -82,7 +70,10 @@ export default function Consultations(props) {
         style={styles.components}
         showsVerticalScrollIndicator={false}>
         <Block flex style={styles.group}>
-          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Consultation</Text>
+          <Block row space="between">
+            <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Consultation</Text>
+            <Button onlyIcon onPress={() => fetchConsultations()} icon="reload1" iconFamily="antdesign" iconSize={14} color={AppStyles.color.tint} iconColor="black" style={{marginTop: 20, marginRight: 20}}>reload</Button>
+          </Block>
           <Text bold size={12} style={[styles.titleConsultation, styles.leftTitle]}>{consultations.length} Consultation</Text>
           <Block flex>
             <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
@@ -159,7 +150,7 @@ export default function Consultations(props) {
       elevation: 1,
     },
     horizontalImage: {
-      height: 122,
+      height: 153,
       width: 'auto',
       borderRadius: 10
     },

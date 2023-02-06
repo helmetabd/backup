@@ -22,7 +22,7 @@ function SignupScreen({navigation}) {
         let { data, status } = response;
         if (status === 200) {
           Alert.alert("Ditambahkan");
-          navigation.navigate("AddProfile");
+          navigation.navigate("Login");
         }
     })
     .catch(err => {
@@ -34,7 +34,7 @@ function SignupScreen({navigation}) {
   return (
     <Block flex center>
       <Block>
-        <Image style={styles.gambar} source={require("../assets/img/Picture5.png")}/>
+        <Image style={styles.gambar} source={require("../assets/img/Picture6.png")}/>
       </Block>
       <Text style={[styles.title, styles.leftTitle]}>Sign Up</Text>
       <Text style={styles.comment}>Please put your information below to create a new account</Text>
@@ -66,7 +66,7 @@ function SignupScreen({navigation}) {
         onPress={() => register()}
       >Sign Up</Button>
       <Text style={styles.or}>Have an account already?</Text>
-      <Text onPress={() => navigation.navigate("Login")} style={{ color: 'dimgrey', fontFamily: 'MonoSpace',}}>  Sign In</Text>
+      <Text onPress={() => navigation.navigate("Login")} style={{ color: 'dimgrey'}}>  Sign In</Text>
     </Block>
   );
 }

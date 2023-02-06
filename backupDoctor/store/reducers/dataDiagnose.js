@@ -1,6 +1,6 @@
-const dataPatient = (state = {}, action) => {
+const dataDiagnose = (state = {}, action) => {
     switch (action.type) {
-        case 'SET_PATIENT':
+        case 'SET_DIAG':
             return action.payload;
             break;
         default:
@@ -9,4 +9,4 @@ const dataPatient = (state = {}, action) => {
     }
 }
 
-export default dataPatient;
+export default dataDiagnose;

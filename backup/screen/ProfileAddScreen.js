@@ -184,13 +184,13 @@ const ProfileAddScreen = ({navigation}) =>  {
   return (
     <Block flex center safe>
       <Block center>
-      <Text style={[styles.title, styles.leftTitle]}>{isProfile ? "Change Profile" : "Input your profile"}</Text>
+      <Text style={[styles.title, styles.leftTitle]}>{dataProfile ? "Change Profile" : "Input your profile"}</Text>
       <Block center style={[styles.imageContainer, styles.shadow]}>
         <TouchableHighlight onPress={() => pickImageAsync()}>
           <Image source={!selectedImage ? AppIcon.images.defaultUser : {uri: selectedImage}} style={styles.horizontalImage} />
         </TouchableHighlight>
       </Block>
-      { isProfile ? edit() : 
+      { dataProfile ? edit() : 
       <Block center>
         <Input
           rounded

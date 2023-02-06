@@ -3,19 +3,23 @@ import axios from "axios";
 import { Block, Text, theme } from "galio-framework";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppStyles } from "../AppStyles";
 import localhostaddress from "../localhost";
 
 const { width, height } = Dimensions.get("screen");
 
-export default function Doctors(props) {
-  const { navigation } = props;
-  const [doctors, setDoctors] = useState([]);
+export default function Referral(props) {
+  const { navigation, route } = props;
+  const dataConsult = useSelector(state => state.dataConsult)
+  const [referral, setReferral] = useState({});
   const dispatch = useDispatch();
+  const dataReferral = useSelector(state => state.dataRefer);
+  const dataPatient = useSelector(state => state.dataPatient);
+  const { id } = route.params;
 
-  const fetchDoctors = async () => {
-    axios.get(`${localhostaddress}:8080/api/doctor`, { 
+  const fetchReferral = async () => {
+    axios.get(`${localhostaddress}:8080/api/referral/${id}`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -23,7 +27,8 @@ export default function Doctors(props) {
     })
     .then(({ data }) => {
         console.log(data);
-        setDoctors(data);
+        setReferral(data);
+        dispatch({ type: 'SET_PATIENT', payload: data.patient.patientDetail })
     })
     .catch((error) => {
         console.log(error)
@@ -32,43 +37,23 @@ export default function Doctors(props) {
   }
 
   useEffect(() => {
-    fetchDoctors();
+    fetchReferral();
   }, [])
 
-  const goToDoctor = (data) => {
-    dispatch({ type: 'SET_DOCTOR', payload: data })
-    navigation.navigate("Consultation");
+  const goToDoctor = () => {
+    // dispatch({ type: 'SET_DOCTOR', payload: data })
+    // navigation.navigate("Consultation");
+    Alert.alert("Copy")
   };
   
-  const renderDoctors = ({ item }) => (
-    // <Product doctor={item} horizontal />
-    <Block row={true} card flex style={[styles.product, styles.shadow]}>
-      <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
-          <Block flex style={[styles.imageContainer, styles.shadow]}>
-            <Image source={{ uri: item.coverImage }} style={styles.horizontalImage} />
-          </Block>
-        </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={() => goToDoctor(item)}>
-          <Block flex space="between" style={styles.productDescription}>
-            <Text bold size={14} style={styles.productTitle}>Dr. {item.name}</Text>
-            <Text size={14} style={styles.productTitle} >{item.age} years old</Text>
-            <Text size={14} style={styles.productTitle} >Specialist {item.specialist}</Text>
-          </Block>
-        </TouchableWithoutFeedback>
-      </Block>
-    // <TouchableHighlight underlayColor="rgba(128, 128, 128, 0.1)" onPress={() => goToDoctor(item)}>
-    //   <View style={styles.container}>
-    //     <View>
-    //       <Image style={styles.photo} source={{ uri: item.coverImage }} />
-    //       <View>
-    //         <Text style={styles.title}>Dr. {item.name}</Text>
-    //         <Text style={styles.title}>{item.specialist}</Text>
-    //         <Text style={styles.title}>{item.age} years old</Text>
-    //       </View>
-    //     </View>
-    //   </View>
-    // </TouchableHighlight>
-  );
+  const convertDate = (date) => {
+    const newDate = new Date(date);
+    const parseDate = newDate.toDateString().split(' ').slice(1);
+    const finalDate = `${parseDate[1]} ${parseDate[0]} ${parseDate[2]}`;
+    // console.log(newDate);
+    return finalDate;
+    // return console.log(date);
+  }
 
   return (
     <Block flex center>
@@ -76,10 +61,21 @@ export default function Doctors(props) {
         style={styles.components}
         showsVerticalScrollIndicator={false}>
         <Block flex style={styles.group}>
-          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Doctor</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Medicine</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>Doctor: {dataConsult.doctor.doctorDetail.name}</Text>
+          <Text bold size={16} style={[styles.title, styles.leftTitle]}>Patient: {dataConsult.patient.patientDetail.name}</Text>
           <Block flex>
             <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-              <FlatList vertical numColumns={1} data={doctors} renderItem={renderDoctors} keyExtractor={(item) => `${item.id}`} />
+            <Block card flex style={[styles.product, styles.shadow]}>
+                  <Block flex style={[styles.imageContainer, styles.shadow]}>
+                    <Image source={{ uri: referral.hospital.image }} style={styles.horizontalImage} />
+                  </Block>
+                  <Block flex space="between" style={styles.productDescription}>
+                    <Text bold size={14} style={styles.productTitle}>{referral.hospital.name}</Text>
+                    <Text size={14} style={styles.productTitle} >{referral.hospital.address}</Text>
+                    <Text size={14} style={styles.productTitle} >{ convertDate(referral.referralDate) }</Text>
+                  </Block>
+              </Block>
             </Block>
           </Block>
         </Block>

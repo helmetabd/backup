@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { Block, Accordion, Text, theme, Button } from 'galio-framework';
+import { Block, Accordion, Text, theme, Button, Input } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
-import {View, StyleSheet, Alert, ScrollView, Image, Dimensions} from 'react-native';
+import {View, StyleSheet, Alert, ScrollView, Image, Dimensions, TextInput} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import localhostaddress from '../localhost';
@@ -14,16 +14,22 @@ const ConsultationDetails = ({ navigation}) => {
 
     const dispatch = useDispatch();
     const dataConsult = useSelector(state => state.dataConsult)
-    const dataDoctor = useSelector(state => state.dataDoctor);
+    const dataPatient = useSelector(state => state.dataPatient);
+    const dataDiagnose = useSelector(state => state.dataDiagnose);
     const [consultation, setConsultation] = useState({});
     const [dataArray, setDataArray] = useState([]);
     const [diagnose, setDiagnose] = useState({});
     const [prescription, setPrescription] = useState({})
     const [data, SetData] = useState({});
+    const [description, setDescription] = useState('');
+    const [status, setStatus] = useState('');
 
 
     const fetchConsultation = async () => {
-        axios.get(`${localhostaddress}:8080/api/consult/${dataConsult.id}`, { 
+
+        // if(dataConsult.status === "Waiting") {
+
+        axios.get(`${localhostaddress}:8081/api/consult/${dataConsult.id}`, { 
             headers:{
                 "Content-Type": "application/json",
                 Authorization: await AsyncStorage.getItem('Authorization')
@@ -35,10 +41,11 @@ const ConsultationDetails = ({ navigation}) => {
             let dataArr = [{  title: "Details", content: data.description }];
             setDataArray(dataArr);
             SetData({
-                image: dataDoctor.doctorDetail.coverImage, 
-                name: dataDoctor.doctorDetail.name,
+                image: dataPatient.patientDetail.coverImage, 
+                name: dataPatient.patientDetail.name,
                 status: data.status,
-                specialist: dataDoctor.doctorDetail.specialist,
+                age: dataPatient.patientDetail.age,
+                gender: dataPatient.patientDetail.gender,
                 subject: data.subject,
                 date: data.consultationDate
             })
@@ -47,54 +54,118 @@ const ConsultationDetails = ({ navigation}) => {
             console.log(error)
             Alert.alert('Something went wrong')
         });
-        
+    // }
     }
 
     const fetchDiagnose = async () => {
-                axios.get(`${localhostaddress}:8080/api/diagnose/${dataConsult.id}`, { 
-                    headers:{
-                        "Content-Type": "application/json",
-                        Authorization: await AsyncStorage.getItem('Authorization')
-                    }
-                })
-                .then(({ data }) => {
+        if(dataConsult.status === "PROGRESS" || dataConsult.status === "COMPLETED"){
+
+            axios.get(`${localhostaddress}:8081/api/diagnose/${dataConsult.id}`, { 
+                headers:{
+                    "Content-Type": "application/json",
+                    Authorization: await AsyncStorage.getItem('Authorization')
+                }
+            })
+            .then(({ data }) => {
                 console.log(data)
                 setDiagnose(data)
                 let dataArr = {  title: "Diagnose", content: data.description }
                 setDataArray(state => {
                     return [...state, dataArr]
                 })
-                })
-                .catch((error) => {
-                    console.log(error)
-                    Alert.alert('Something went wrong')
-                });
-    
+            })
+            .catch((error) => {
+                console.log(error)
+                Alert.alert('Something went wrong')
+            });
+        }
     }
 
-    const fetchPrescription = async () => {
-            
-           axios.get(`${localhostaddress}:8080/api/prescription/${consultation.id}`, { 
-                    headers:{
-                        "Content-Type": "application/json",
-                        Authorization: await AsyncStorage.getItem('Authorization')
+    const sendDiagnose = async () => {
+        if (description.length <= 0 ) {
+            Alert.alert('Please fill out the required fields.');
+            return;
+        }
+        try {
+          let { data } = await axios.post(`${localhostaddress}:8081/api/diagnose`, 
+            { consultationId: dataConsult.id, description: description, status: status }, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: await AsyncStorage.getItem("Authorization")
+            },
+            })
+            dispatch({ type: 'SET_DIAG', payload: data });
+            navigation.navigate("Consultations");
+            fetchDiagnose();
+        } catch (error) {
+          console.log(error)
+          Alert.alert("Something went wrong");
+        } 
+      };
+
+    const buttonDiagnose = () => {
+        if(data.status === "Waiting"){
+            return(
+                <Block center>
+                    <Block>
+                        <Text style={styles.body}>Diagnose</Text>
+                        <View
+                            style={{
+                            backgroundColor: "transparent",
+                            borderColor: '#000000',
+                            borderWidth: 1,
+                            width: 325,
+                            height: 100,
+                            marginTop: 5,
+                            borderRadius: 20
+                            }}>
+                            <TextInput
+                            editable
+                            placeholder='Description'
+                            multiline
+                            numberOfLines={5}
+                            maxLength={400}
+                            onChangeText={setDescription}
+                            value={description}
+                            style={{paddingLeft: 15, height: 100, width: AppStyles.textInputWidth.main}}
+                            />
+                        </View>
+                        <Input
+                            rounded
+                            type='default'
+                            placeholder='Status: hospital/medicine'
+                            bgColor='transparent'
+                            style={styles.InputContainer}
+                            onChangeText={setStatus}
+                            value={status}
+                        />
+                    </Block>
+                    <Block>
+                        <Button color={AppStyles.color.tint} onPress={() => sendDiagnose()}>Send Feedback</Button>
+                    </Block>
+                </Block>
+            )
+        } else if(data.status === "PROGRESS"){
+            return(
+                <Block>
+                    {(diagnose.status === "hospital") ? 
+                    <Button color={AppStyles.color.tint} onPress={() => {navigation.navigate("Hospitals")}}>Send Referral Hospital</Button>
+                    : <Button color={AppStyles.color.tint} onPress={() => {navigation.navigate("Medicines")}}>Send Prescription</Button>
                     }
-                })
-                .then(({ data }) => {
-                console.log(data)
-                setPrescription(data)
-                dispatch({ type: 'SET_PRES', payload: data })
-                })
-                .catch((error) => {
-                    console.log(error)
-                    Alert.alert('Something went wrong')
-                });
+                </Block>
+            )
+        } else{
+            return(
+                <Block>
+                    <Button color={AppStyles.color.tint} disabled>{(diagnose.status === "hospital") ? "Completed Send Referral Hospital" : "Completed Send Prescription" }</Button>
+                </Block>
+            )
+        }
     }
     
     useEffect(() => {
         fetchConsultation();
         fetchDiagnose();
-        // fetchPrescription();
     }, [])
 
     const convertDate = (date) => {
@@ -117,8 +188,9 @@ const ConsultationDetails = ({ navigation}) => {
                         <Image source={{ uri: data.image }} style={styles.horizontalImage} />
                     </Block>
                     <Block center flex space="between" style={styles.productDescription}>
-                        <Text bold size={14} style={styles.productTitle}>Dr. {data.name}</Text>
-                        <Text size={14} style={styles.productTitle} >Specialist {data.specialist}</Text>
+                        <Text bold size={14} style={styles.productTitle}>{data.name}</Text>
+                        <Text size={14} style={styles.productTitle} >{data.age} years old</Text>
+                        <Text size={14} style={styles.productTitle} >{data.gender}</Text>
                     </Block>
                 </Block>
                 <Block >
@@ -135,10 +207,10 @@ const ConsultationDetails = ({ navigation}) => {
                     <AntDesign name="calendar" size={24} color="black" />
                     <Text style={styles.comment}>{convertDate(data.date)}</Text>
                 </Block >
-                <Block style={{ height: 200 }}>
+                <Block center style={{ height: 200 }}>
                     <Accordion dataArray={dataArray} />
                 </Block>
-                <Button disabled={prescription ? false : true} size="large" color={AppStyles.color.tint} onPress={() => {navigation.navigate("Prescription")}}>Go to Precription</Button>
+                <Block center style={{marginTop: 10}}>{buttonDiagnose()}</Block>
             </Block>
         </Block>
     </ScrollView>
@@ -216,6 +288,18 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         textAlign: 'left',
         marginLeft: 20,
+      },
+      body: {
+        marginTop: 10,
+        marginBottom: 5,
+        paddingLeft: 20,
+        paddingRight: 20,
+        color: "black",
+        fontWeight:'bold'
+      },
+      InputContainer: {
+        width: 325,
+        marginTop: 30,
       },
 })
 

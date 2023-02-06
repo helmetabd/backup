@@ -14,16 +14,16 @@ const thumbMeasure = (width - 48 - 32) / 3;
 export const StatusHeight = StatusBar.currentHeight;
 export const HeaderHeight = (theme.SIZES.BASE * 3.5 + (StatusHeight || 0));
 
-export default function Profile({navigation, route}) {
+export default function HospitalDetail({navigation, route}) {
   
   const dispatch = useDispatch();
   const dataMedic = useSelector(state => state.dataMedic);
-  const [medicine, setMedicine] = useState({});
-  const [quantity, setQuantity] = useState(0);
+  const dataDiagnose = useSelector(state => state.dataDiagnose);
+  const [hospital, setHospital] = useState({});
   const { id } = route.params;
 
-  const fetchMedicine = async () => {
-    axios.get(`${localhostaddress}:8080/api/medicine/${id}`, { 
+  const fetchHospital = async () => {
+    axios.get(`${localhostaddress}:8081/api/hospital/${id}`, { 
         headers:{
             "Content-Type": "application/json",
             Authorization: await AsyncStorage.getItem('Authorization')
@@ -31,7 +31,7 @@ export default function Profile({navigation, route}) {
     })
     .then(({ data }) => {
         console.log(data);
-        setMedicine(data);
+        setHospital(data);
     })
     .catch((error) => {
         console.log(error)
@@ -40,19 +40,21 @@ export default function Profile({navigation, route}) {
   }
 
   useEffect(() => {
-    fetchMedicine();
+    fetchHospital();
   }, [])
 
-  const addCart = async (id, quantity) => {
+  const addReferral = async (id) => {
     try {
-      let { data } = await axios.post(`${localhostaddress}:8080/api/add-to-cart`, 
-      { medicineId: id, quantity: quantity }, {
+      let { data } = await axios.post(`${localhostaddress}:8081/api/referral`, 
+      { hospitalId: id, diagnoseId: dataDiagnose.id }, {
       headers: {
         "Content-Type": "application/json",
         Authorization: await AsyncStorage.getItem("Authorization")
       },
     });
-    dispatch({ type: 'ADD_CART', payload: data })
+    // dispatch({ type: 'ADD_CART', payload: data })
+    Alert.alert("Added");
+    navigation.navigate("Consultations");
     } catch (error) {
       console.log(err);
       Alert.alert('Something went wrong')
@@ -63,7 +65,7 @@ export default function Profile({navigation, route}) {
       <Block flex style={styles.profile}>
         <Block flex>
           <ImageBackground
-            source={{uri: medicine.image}}
+            source={{uri: hospital.image}}
             style={styles.profileContainer}
             imageStyle={styles.profileImage}>
             <Block flex style={styles.profileDetails}>
@@ -73,22 +75,22 @@ export default function Profile({navigation, route}) {
         <Block flex shadow shadowColor="red" style={styles.options}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Block center style={{ margin: 25, marginTop: 20 }}>
-              <Text size={28} bold style={styles.infoRecipeName}>{medicine.name}</Text>
+              <Text size={25} bold style={styles.infoRecipeName}>{hospital.name}</Text>
             </Block>
-            <Block row space="evenly" style={{ padding: theme.SIZES.BASE, }}>
+            <Block space="evenly" style={{ padding: theme.SIZES.BASE, }}>
               <Block middle>
-                <Text bold size={16} style={{marginBottom: 8}}>{medicine.stocks}</Text>
-                <Text muted size={16}>Stocks: </Text>
+                <Text muted size={16}>Address: </Text>
+                <Text bold size={16} style={{marginBottom: 8}}>{hospital.address}</Text>
               </Block>
               <Block middle>
-                <Text bold size={16} style={{marginBottom: 8}}>{medicine.price}</Text>
-                <Text muted size={16}>Price: </Text>
+                <Text muted size={16}>Description: </Text>
+                <Text bold size={16} style={{marginBottom: 8}}>{hospital.description}</Text>
               </Block>
             </Block>
-            <Block style={{ paddingBottom: -HeaderHeight * 2 }}>
+            {/* <Block style={{ paddingBottom: -HeaderHeight * 2 }}> */}
+            <Block style={{ paddingBottom: 150 }}>
               <Block center>
-                <NumericInput value={quantity} onChange={value => setQuantity({value})} />
-                <Button round color={AppStyles.color.tint} onPress={() => addCart(medicine.id, quantity)}>Add to cart</Button>
+                <Button round color={AppStyles.color.tint} onPress={() => addReferral(hospital.id)}>Add To Referral</Button>
               </Block>
             </Block>
           </ScrollView>
@@ -101,6 +103,7 @@ const styles = StyleSheet.create({
   profile: {
     marginTop: Platform.OS === 'android' ? -HeaderHeight : 0,
     marginBottom: -HeaderHeight * 2,
+    paddingBottom: 20
   },
   profileImage: {
     width: width * 1.1,

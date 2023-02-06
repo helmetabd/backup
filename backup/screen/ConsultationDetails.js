@@ -19,6 +19,7 @@ const ConsultationDetails = ({ navigation}) => {
     const [dataArray, setDataArray] = useState([]);
     const [diagnose, setDiagnose] = useState({});
     const [prescription, setPrescription] = useState({})
+    const [referral, setReferral] = useState({})
     const [data, SetData] = useState({});
 
 
@@ -51,6 +52,8 @@ const ConsultationDetails = ({ navigation}) => {
     }
 
     const fetchDiagnose = async () => {
+
+        if(dataConsult.status === "PROGRESS" || dataConsult.status === "COMPLETED"){
         axios.get(`${localhostaddress}:8080/api/diagnose/${dataConsult.id}`, { 
             headers:{
                 "Content-Type": "application/json",
@@ -69,11 +72,14 @@ const ConsultationDetails = ({ navigation}) => {
             console.log(error)
             Alert.alert('Something went wrong')
         });
-    
+        }
     }
 
-    const fetchPrescription = async () => {           
-        axios.get(`${localhostaddress}:8080/api/prescription/${consultation.id}`, { 
+    const fetchPresRefer = async () => {           
+        
+        if(dataConsult.status === "COMPLETED" && diagnose.status === "medicine"){
+
+        axios.get(`${localhostaddress}:8080/api/prescription/${diagnose.id}`, { 
             headers:{
                 "Content-Type": "application/json",
                 Authorization: await AsyncStorage.getItem('Authorization')
@@ -82,18 +88,68 @@ const ConsultationDetails = ({ navigation}) => {
         .then(({ data }) => {
             console.log(data)
             setPrescription(data)
+            let dataArr = {  title: "Diagnose", content: data.diagnose.description }
+            setDataArray(state => {
+                return [...state, dataArr]
+            })
             dispatch({ type: 'SET_PRES', payload: data })
         })
         .catch((error) => {
             console.log(error)
             Alert.alert('Something went wrong')
         });
+
+    } else if(dataConsult.status === "COMPLETED" && diagnose.status === "hospital"){
+        axios.get(`${localhostaddress}:8080/api/referral/${diagnose.id}`, { 
+            headers:{
+                "Content-Type": "application/json",
+                Authorization: await AsyncStorage.getItem('Authorization')
+            }
+        })
+        .then(({ data }) => {
+            console.log(data)
+            setReferral(data)
+            let dataArr = {  title: "Diagnose", content: data.diagnose.description }
+            setDataArray(state => {
+                return [...state, dataArr]
+            })
+            dispatch({ type: 'SET_REFER', payload: data })
+        })
+        .catch((error) => {
+            console.log(error)
+            Alert.alert('Something went wrong')
+        });
+        }
+    }
+
+    const buttonreferandpres = () => {
+        if(dataConsult.status === "COMPLETED"){
+            if(diagnose.status === "medicine"){
+                return(
+                    <Block>
+                        <Button round size="large" color={AppStyles.color.tint} onPress={() => {navigation.navigate("Prescription", {
+                            id: referral.id
+                        }) 
+                    }}>Go to Precription</Button>
+                    </Block>
+                )
+            } else if(diagnose.status === "hospital"){
+                return(
+                    <Block>
+                        <Button round size="large" color={AppStyles.color.tint} onPress={() => {navigation.navigate("Referral", {
+                            id: referral.id
+                        }) 
+                    }}>Go to Referral</Button>
+                    </Block>
+                )
+            }
+        }
     }
     
     useEffect(() => {
         fetchConsultation();
         fetchDiagnose();
-        // fetchPrescription();
+        fetchPresRefer();
     }, [])
 
     const convertDate = (date) => {
@@ -134,10 +190,10 @@ const ConsultationDetails = ({ navigation}) => {
                     <AntDesign name="calendar" size={24} color="black" />
                     <Text style={styles.comment}>{convertDate(data.date)}</Text>
                 </Block >
-                <Block style={{ height: 200 }}>
+                <Block center style={{ height: 200, width: 325 }}>
                     <Accordion dataArray={dataArray} />
                 </Block>
-                <Button disabled={prescription ? false : true} size="large" color={AppStyles.color.tint} onPress={() => {navigation.navigate("Prescription")}}>Go to Precription</Button>
+                <Block>{buttonreferandpres()}</Block>
             </Block>
         </Block>
     </ScrollView>

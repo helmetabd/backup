@@ -22,7 +22,7 @@ function SignupScreen({navigation}) {
         let { data, status } = response;
         if (status === 200) {
           Alert.alert("Ditambahkan");
-          navigation.navigate("AddProfile");
+          navigation.navigate("Login");
         }
     })
     .catch(err => {

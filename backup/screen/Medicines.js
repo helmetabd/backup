@@ -1,9 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { Block, Text, theme } from "galio-framework";
+import { Block, Text, theme, Button } from "galio-framework";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView, Button } from "react-native";
-import TextRN, { Text } from "react-native";
+import { FlatList, Image, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { AppStyles } from "../AppStyles";
 import localhostaddress from "../localhost";
@@ -57,7 +56,9 @@ export default function Medicines(props) {
 
   const goToMedicine = (data) => {
     dispatch({ type: 'SET_MEDIC', payload: data })
-    navigation.navigate("MedicineDetail");
+    navigation.navigate("MedicineDetail", {
+      id: data.id,
+    });
   };
   
   const renderMedicines = ({ item }) => (
@@ -70,15 +71,17 @@ export default function Medicines(props) {
         </TouchableWithoutFeedback>
         <TouchableWithoutFeedback onPress={() => goToMedicine(item)}>
           <Block flex space="between" style={styles.productDescription}>
-            <TextRN style={styles.productTitleNew}>{item.name}</TextRN>
+            {/* <TextRN style={styles.productTitleNew}>{item.name}</TextRN> */}
             <Text bold size={14} style={styles.productTitle}>{item.name}</Text>
             <Text size={14} style={styles.productTitle} >Rp. {item.price}</Text>
             <Text size={14} style={styles.productTitle} >Stocks: {item.stocks}</Text>
           </Block>
         </TouchableWithoutFeedback>
-        <Block>
-          <NumericInput value={quantity} onChange={value => setQuantity({value})} />
-          <Button onPress={() => addCart(item.id, quantity)}>Add to cart</Button>
+        <Block center>
+          <NumericInput value={quantity} onChange={value => setQuantity(value)} totalHeight={35}/>
+          <Block style={{marginVertical: 8}}>
+            <Button round color={AppStyles.color.tint} onPress={() => addCart(item.id, quantity)}>Add To Cart</Button>
+          </Block>
         </Block>
       </Block>
     // <TouchableHighlight underlayColor="rgba(128, 128, 128, 0.1)" onPress={() => goToDoctor(item)}>
@@ -103,7 +106,7 @@ export default function Medicines(props) {
         <Block flex style={styles.group}>
           <Text bold size={16} style={[styles.title, styles.leftTitle]}>List Medicine</Text>
           <Block flex>
-            <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
+            <Block style={{ paddingHorizontal: theme.SIZES.BORDER_RADIUS }}>
               <FlatList vertical numColumns={2} data={medicines} renderItem={renderMedicines} keyExtractor={(item) => `${item.id}`} />
             </Block>
           </Block>
@@ -153,6 +156,8 @@ export default function Medicines(props) {
       marginVertical: theme.SIZES.BASE,
       borderWidth: 0,
       minHeight: 114,
+      padding: 5,
+      margin: 5
     },
     shadow: {
     shadowColor: theme.COLORS.BLACK,

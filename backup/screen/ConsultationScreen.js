@@ -60,6 +60,7 @@ function ConsultationScreen({navigation}) {
         },
       });
       dispatch({ type: 'SET_CONSULT', payload: data })
+      dispatch({ type: 'SET_DOCTOR', payload: data.doctor })
       navigation.navigate("Consultation Detail")
     } catch(err) {
       console.log(err);

@@ -14,13 +14,14 @@ import DrawerContainer from '../components/DrawerContainer';
 import ProfileAddScreen from '../screen/ProfileAddScreen';
 import InputImage from '../components/InputImage';
 import Doctors from '../screen/Doctors';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import ConsultationScreen from '../screen/ConsultationScreen';
 import Consultations from '../screen/Consultations';
 import ConsultationDetails from '../screen/ConsultationDetails';
 import Prescription from '../screen/Prescriptions';
 import Medicines from '../screen/Medicines';
 import MedicineDetail from "../screen/MedicineDetail"
+import Referral from '../screen/Referral';
 
 const Stack = createStackNavigator();
 
@@ -91,7 +92,7 @@ const MedicineStack = () => {
             <AntDesign name="shoppingcart" size={24} color="black" />
           </Pressable>
         ),
-        headerRightContainerStyle: {paddingLeft: 10},
+        headerRightContainerStyle: {paddingRight: 15},
       })}
     />
     <Stack.Screen name="MedicineDetail" component={MedicineDetail} />
@@ -118,11 +119,13 @@ const ConsultationStack = () => {
             <Image style={styles.iconStyle} source={AppIcon.images.menu} />
           </Pressable>
         ),
+        headerRightContainerStyle: {paddingRight: 15},
         headerLeftContainerStyle: {paddingLeft: 10},
       })}
     />
     <Stack.Screen name="Consultation Detail" component={ConsultationDetails} />
     <Stack.Screen name="Prescription" component={Prescription} />
+    <Stack.Screen name="Referral" component={Referral} />
   </Stack.Navigator>
   )
 }
@@ -216,7 +219,7 @@ const TabNavigator = () => (
         },
         headerShown: false,
       }}
-      name="Doctor"
+      name="DoctorStack"
       component={DoctorStack}
     />
     <BottomTab.Screen
@@ -229,8 +232,21 @@ const TabNavigator = () => (
         },
         headerShown: false,
       }}
-      name="Consultation"
+      name="ConsultationStack"
       component={ConsultationStack}
+    />
+    <BottomTab.Screen
+      options={{
+        tabBarLabel: 'Medicine',
+        tabBarIcon: ({focused}) => {
+          return (
+            <FontAwesome5 name="pills" size={24} color="black" />
+          );
+        },
+        headerShown: false,
+      }}
+      name="MedicineStack"
+      component={MedicineStack}
     />
   </BottomTab.Navigator>
 );

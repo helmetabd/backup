@@ -12,24 +12,32 @@ const Home = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
     const dataProfile = useSelector(state => state.dataProfile)
+    const isProfile = useSelector(state => state.isProfile)
 
     const fetchProfile = async () => {
-        axios.get(`${localhostaddress}:8080/api/patient`, { 
-            headers:{
-                "Content-Type": "application/json",
-                Authorization: await AsyncStorage.getItem('Authorization')
-            }
-        })
-        .then(({ data }) => {
-            console.log(data)
-            dispatch({ type: 'SET_DATA', payload: data })
-            dispatch({ type: 'SET_PROFILE'});
-        })
-        .catch((error) => {
-            console.log(error)
-            Alert.alert('Something went wrong')
-        });
-        console.log(dataProfile)
+
+        if(!dataProfile){
+            navigation.navigate("AddProfile");
+
+        } else{
+
+            axios.get(`${localhostaddress}:8080/api/patient`, { 
+                headers:{
+                    "Content-Type": "application/json",
+                    Authorization: await AsyncStorage.getItem('Authorization')
+                }
+            })
+            .then(({ data }) => {
+                console.log(data)
+                dispatch({ type: 'SET_DATA', payload: data })
+                dispatch({ type: 'SET_PROFILE'});
+            })
+            .catch((error) => {
+                console.log(error)
+                Alert.alert('Something went wrong')
+            });
+            console.log(dataProfile)
+        }
     }
 
     useEffect(() => {

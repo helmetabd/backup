@@ -12,13 +12,13 @@ import WelcomeScreen from '../screen/WelcomeScreen';
 import {AppIcon, AppStyles} from '../AppStyles';
 import DrawerContainer from '../components/DrawerContainer';
 import ProfileAddScreen from '../screen/ProfileAddScreen';
-import InputImage from '../components/InputImage';
-import Doctors from '../screen/Doctors';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-import ConsultationScreen from '../screen/ConsultationScreen';
 import Consultations from '../screen/Consultations';
 import ConsultationDetails from '../screen/ConsultationDetails';
-import Prescription from '../screen/Prescriptions';
+import Medicines from '../screen/Medicines';
+import Hospitals from '../screen/Hospitals';
+import HospitalDetail from '../screen/HospitalDetail';
+import MedicineDetail from '../screen/MedicineDetail';
 
 const Stack = createStackNavigator();
 
@@ -36,32 +36,6 @@ const LoginStack = () => (
     <Stack.Screen name="Signup" component={SignupScreen} />
   </Stack.Navigator>
 );
-
-const DoctorStack = () => {
-  return(
-  <Stack.Navigator
-    initialRouteName="Doctor"
-    screenOptions={{
-      headerTintColor: 'red',
-      headerTitleStyle: styles.headerTitleStyle,
-      headerMode: 'float',
-    }}>
-    <Stack.Screen
-      name="Doctor"
-      component={Doctors}
-      options={({navigation}) => ({
-        headerLeft: () => (
-          <Pressable onPress={() => navigation.openDrawer()}>
-            <Image style={styles.iconStyle} source={AppIcon.images.menu} />
-          </Pressable>
-        ),
-        headerLeftContainerStyle: {paddingLeft: 10},
-      })}
-    />
-    <Stack.Screen name="Consultation" component={ConsultationScreen} />
-  </Stack.Navigator>
-  )
-}
 
 const ConsultationStack = () => {
   return(
@@ -85,7 +59,10 @@ const ConsultationStack = () => {
       })}
     />
     <Stack.Screen name="Consultation Detail" component={ConsultationDetails} />
-    <Stack.Screen name="Prescription" component={Prescription} />
+    <Stack.Screen name="Medicines" component={Medicines} />
+    <Stack.Screen name="Hospitals" component={Hospitals} />
+    <Stack.Screen name="HospitalDetail" component={HospitalDetail} />
+    <Stack.Screen name="MedicineDetail" component={MedicineDetail} />
   </Stack.Navigator>
   )
 }
@@ -118,18 +95,6 @@ const HomeStack = () => {
         name="AddProfile"
         component={ProfileAddScreen}
       />
-      <Stack.Screen
-        name="Doctor"
-        component={DoctorStack}
-        options={({navigation}) => ({
-          headerLeft: () => (
-            <Pressable onPress={() => navigation.openDrawer()}>
-              <Image style={styles.iconStyle} source={AppIcon.images.menu} />
-            </Pressable>
-          ),
-          headerLeftContainerStyle: {paddingLeft: 10},
-        })}
-      />
     </Stack.Navigator>
   )
 };
@@ -159,19 +124,6 @@ const TabNavigator = () => (
     />
     <BottomTab.Screen
       options={{
-        tabBarLabel: 'Doctor',
-        tabBarIcon: ({focused}) => {
-          return (
-            <MaterialCommunityIcons name="doctor" size={24} color="black" />
-          );
-        },
-        headerShown: false,
-      }}
-      name="Doctor"
-      component={DoctorStack}
-    />
-    <BottomTab.Screen
-      options={{
         tabBarLabel: 'Consultation',
         tabBarIcon: ({focused}) => {
           return (
@@ -180,7 +132,7 @@ const TabNavigator = () => (
         },
         headerShown: false,
       }}
-      name="Consultation"
+      name="ConsultationStack"
       component={ConsultationStack}
     />
   </BottomTab.Navigator>
