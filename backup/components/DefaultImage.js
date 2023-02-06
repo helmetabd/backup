@@ -18,7 +18,8 @@ const styles = StyleSheet.create({
         height: 150, 
         borderRadius: 20, 
         alignItems: 'center', 
-        justifyContent: 'center'}
+        justifyContent: 'center'
+    }
 })
 
 export default DefaultImage;

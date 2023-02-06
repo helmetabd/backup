@@ -59,8 +59,8 @@ function ConsultationScreen({navigation}) {
           Authorization: await AsyncStorage.getItem("Authorization")
         },
       });
-      navigation.navigate("Consultation Detail", { data })
       dispatch({ type: 'SET_CONSULT', payload: data })
+      navigation.navigate("Consultation Detail")
     } catch(err) {
       console.log(err);
       Alert.alert('Something went wrong')
@@ -92,25 +92,6 @@ function ConsultationScreen({navigation}) {
             value={subject}
             label="Subject"
           />
-          {/* <Textarea
-            containerStyle={styles.textareaContainer}
-            style={styles.textarea}
-            onChangeText={setDescription}
-            defaultValue={description}
-            maxLength={120}
-            placeholder={'Description'}
-            placeholderTextColor={'black'}
-            underlineColorAndroid={'transparent'}
-          /> */}
-          {/* <Input
-            multiline={true}
-            textStyle={styles.textarea}
-            placeholder="Description"
-            numberOfLines={5}
-            style={styles.textareaContainer}
-            onChangeText={setDescription}
-            value={description}
-          /> */}
           <Block>
           <Text style={styles.body}>Description</Text>
           <View

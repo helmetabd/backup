@@ -25,11 +25,6 @@ export default function DrawerContainer({navigation}) {
           icon="user"
           onPress={() => {navigation.navigate("AddProfile")}}
         />
-        {/* <MenuButton
-          title="Image"
-          icon="picture"
-          onPress={() => {navigation.navigate("Image")}}
-        /> */}
         <MenuButton
           title="Logout"
           icon="logout"

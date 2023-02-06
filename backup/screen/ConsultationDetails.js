@@ -51,44 +51,43 @@ const ConsultationDetails = ({ navigation}) => {
     }
 
     const fetchDiagnose = async () => {
-                axios.get(`${localhostaddress}:8080/api/diagnose/${dataConsult.id}`, { 
-                    headers:{
-                        "Content-Type": "application/json",
-                        Authorization: await AsyncStorage.getItem('Authorization')
-                    }
-                })
-                .then(({ data }) => {
-                console.log(data)
-                setDiagnose(data)
-                let dataArr = {  title: "Diagnose", content: data.description }
-                setDataArray(state => {
-                    return [...state, dataArr]
-                })
-                })
-                .catch((error) => {
-                    console.log(error)
-                    Alert.alert('Something went wrong')
-                });
+        axios.get(`${localhostaddress}:8080/api/diagnose/${dataConsult.id}`, { 
+            headers:{
+                "Content-Type": "application/json",
+                Authorization: await AsyncStorage.getItem('Authorization')
+            }
+        })
+        .then(({ data }) => {
+            console.log(data)
+            setDiagnose(data)
+            let dataArr = {  title: "Diagnose", content: data.description }
+            setDataArray(state => {
+                return [...state, dataArr]
+            })
+        })
+        .catch((error) => {
+            console.log(error)
+            Alert.alert('Something went wrong')
+        });
     
     }
 
-    const fetchPrescription = async () => {
-            
-           axios.get(`${localhostaddress}:8080/api/prescription/${consultation.id}`, { 
-                    headers:{
-                        "Content-Type": "application/json",
-                        Authorization: await AsyncStorage.getItem('Authorization')
-                    }
-                })
-                .then(({ data }) => {
-                console.log(data)
-                setPrescription(data)
-                dispatch({ type: 'SET_PRES', payload: data })
-                })
-                .catch((error) => {
-                    console.log(error)
-                    Alert.alert('Something went wrong')
-                });
+    const fetchPrescription = async () => {           
+        axios.get(`${localhostaddress}:8080/api/prescription/${consultation.id}`, { 
+            headers:{
+                "Content-Type": "application/json",
+                Authorization: await AsyncStorage.getItem('Authorization')
+            }
+        })
+        .then(({ data }) => {
+            console.log(data)
+            setPrescription(data)
+            dispatch({ type: 'SET_PRES', payload: data })
+        })
+        .catch((error) => {
+            console.log(error)
+            Alert.alert('Something went wrong')
+        });
     }
     
     useEffect(() => {

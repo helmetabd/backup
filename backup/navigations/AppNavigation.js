@@ -19,6 +19,8 @@ import ConsultationScreen from '../screen/ConsultationScreen';
 import Consultations from '../screen/Consultations';
 import ConsultationDetails from '../screen/ConsultationDetails';
 import Prescription from '../screen/Prescriptions';
+import Medicines from '../screen/Medicines';
+import MedicineDetail from "../screen/MedicineDetail"
 
 const Stack = createStackNavigator();
 
@@ -59,6 +61,41 @@ const DoctorStack = () => {
       })}
     />
     <Stack.Screen name="Consultation" component={ConsultationScreen} />
+    <Stack.Screen name="Consultation Detail" component={ConsultationDetails} />
+  </Stack.Navigator>
+  )
+}
+
+const MedicineStack = () => {
+  return(
+  <Stack.Navigator
+    initialRouteName="Medicine"
+    screenOptions={{
+      headerTintColor: 'red',
+      headerTitleStyle: styles.headerTitleStyle,
+      headerMode: 'float',
+    }}>
+    <Stack.Screen
+      name="Medicine"
+      component={Medicines}
+      options={({navigation}) => ({
+        headerLeft: () => (
+          <Pressable onPress={() => navigation.openDrawer()}>
+            <Image style={styles.iconStyle} source={AppIcon.images.menu} />
+          </Pressable>
+        ),
+        headerLeftContainerStyle: {paddingLeft: 10},
+        headerRight: () => (
+          <Pressable onPress={() => navigation.navigate("")}>
+            {/* <Image style={styles.iconStyle} source={AppIcon.images.menu} /> */}
+            <AntDesign name="shoppingcart" size={24} color="black" />
+          </Pressable>
+        ),
+        headerRightContainerStyle: {paddingLeft: 10},
+      })}
+    />
+    <Stack.Screen name="MedicineDetail" component={MedicineDetail} />
+    {/* <Stack.Screen name="Consultation Detail" component={ConsultationDetails} /> */}
   </Stack.Navigator>
   )
 }
@@ -121,6 +158,18 @@ const HomeStack = () => {
       <Stack.Screen
         name="Doctor"
         component={DoctorStack}
+        options={({navigation}) => ({
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <Image style={styles.iconStyle} source={AppIcon.images.menu} />
+            </Pressable>
+          ),
+          headerLeftContainerStyle: {paddingLeft: 10},
+        })}
+      />
+      <Stack.Screen
+        name="Consultation"
+        component={ConsultationStack}
         options={({navigation}) => ({
           headerLeft: () => (
             <Pressable onPress={() => navigation.openDrawer()}>

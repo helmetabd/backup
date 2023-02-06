@@ -6,6 +6,8 @@ import dataConsult from "./dataConsult";
 import dataDoctor from "./dataDoctor";
 import dataPatient from "./dataPatient";
 import dataPrescription from "./dataPrescription"
+import dataCart from "./dataCart"
+import dataMedic from "./dataMedic";
 
 const reducers = combineReducers({
     isLogin: loginReducer,
@@ -14,7 +16,9 @@ const reducers = combineReducers({
     dataConsult: dataConsult,
     dataDoctor: dataDoctor,
     dataPrescription: dataPrescription,
-    dataPatient: dataPatient
+    dataPatient: dataPatient,
+    dataCart: dataCart,
+    dataMedic: dataMedic
 })
 
 export default reducers;
